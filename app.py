@@ -307,7 +307,7 @@ elif page == "Project Details":
     st.markdown("### 🔗 GitHub Repository")
     if st.button("🔗 Visit GitHub Project"):
         st.write("Opening GitHub...")
-        st.markdown("https://github.com/PranuthHM/ai-k8s-data-analytics-platform")
+        st.markdown("https://github.com/PranuthHM/ai-ecommerce-analytics-platform")
 
 
     st.success("Thank you for reviewing this project!")
