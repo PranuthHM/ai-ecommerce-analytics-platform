@@ -32,6 +32,10 @@ page = st.sidebar.radio(
         "Product Analytics",
         "Customer Analytics",
         "AI Sales Prediction",
+        "Customer Value Analysis",
+        "Product Association",
+        "Model Comparison",
+        "Business Insights",
         "Project Details"
     ]
 )
@@ -267,6 +271,233 @@ elif page == "AI Sales Prediction":
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+
+# ================= Customer Segmentation =================
+# ================= Customer Segmentation =================
+elif page == "Customer Value Analysis":
+
+    st.title("💰 Customer Value Segmentation")
+
+    df = filtered_data.copy()
+
+    df = df.dropna(subset=["CustomerID"])
+
+    df["TotalPrice"] = df["Quantity"] * df["UnitPrice"]
+
+    customer_spend = (
+        df.groupby("CustomerID")["TotalPrice"]
+        .sum()
+        .reset_index()
+    )
+
+    # Percentile segmentation
+    customer_spend["Segment"] = pd.qcut(
+        customer_spend["TotalPrice"],
+        q=4,
+        labels=["Low Value", "Medium", "High", "VIP"]
+    )
+
+    segment_counts = customer_spend["Segment"].value_counts()
+
+    fig = px.pie(
+        values=segment_counts.values,
+        names=segment_counts.index,
+        title="Customer Value Distribution",
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+      
+      
+      
+      
+            
+# ================= Customer Intelligence =================
+# ================= Customer Intelligence =================
+
+elif page == "Product Association":
+
+    st.title("🛒 Market Basket Analysis")
+
+    from mlxtend.frequent_patterns import apriori, association_rules
+
+    df = filtered_data.copy()
+
+    df = df.dropna(subset=["Description"])
+
+    basket = (
+        df.groupby(['InvoiceNo','Description'])['Quantity']
+        .sum()
+        .unstack()
+        .fillna(0)
+    )
+
+    basket = basket.applymap(lambda x: 1 if x > 0 else 0)
+
+    frequent_items = apriori(basket, min_support=0.02, use_colnames=True)
+
+    rules = association_rules(frequent_items, metric="lift", min_threshold=1)
+
+    st.write("Top Product Associations")
+
+    st.dataframe(rules[['antecedents','consequents','support','confidence','lift']].head(10))
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+################################ Model Comparisiom #####################
+################################ Model Comparison #####################
+
+################################ Model Comparison #####################
+
+elif page == "Model Comparison":
+
+    st.title("🤖 Machine Learning Model Performance")
+
+    from sklearn.linear_model import LinearRegression
+    from sklearn.tree import DecisionTreeRegressor
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+    from sklearn.model_selection import train_test_split
+
+    daily_sales = (
+        filtered_data.groupby(filtered_data['InvoiceDate'].dt.date)['TotalPrice']
+        .sum()
+        .reset_index()
+    )
+
+    daily_sales['Day'] = np.arange(len(daily_sales))
+
+    X = daily_sales[['Day']]
+    y = daily_sales['TotalPrice']
+
+    X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)
+
+    models = {
+        "Linear Regression": LinearRegression(),
+        "Decision Tree": DecisionTreeRegressor(),
+        "Random Forest": RandomForestRegressor()
+    }
+
+    results = []
+
+    for name, model in models.items():
+
+        model.fit(X_train, y_train)
+
+        pred = model.predict(X_test)
+
+        r2 = r2_score(y_test, pred)
+        mae = mean_absolute_error(y_test, pred)
+        mse = mean_squared_error(y_test, pred)
+        rmse = np.sqrt(mse)
+
+        results.append({
+            "Model": name,
+            "R2 Score": r2,
+            "MAE": mae,
+            "MSE": mse,
+            "RMSE": rmse
+        })
+
+    result_df = pd.DataFrame(results)
+
+    # show clean table
+    st.subheader("Model Performance Table")
+    st.dataframe(result_df.round(2))
+
+
+    # ---------------- R2 SCORE ----------------
+    fig = px.bar(
+        result_df,
+        x="Model",
+        y="R2 Score",
+        title="R2 Score Comparison",
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig)
+
+    # ---------------- MAE ----------------
+    fig = px.bar(
+        result_df,
+        x="Model",
+        y="MAE",
+        title="Mean Absolute Error",
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig)
+
+    # ---------------- MSE ----------------
+    fig = px.bar(
+        result_df,
+        x="Model",
+        y="MSE",
+        title="Mean Squared Error",
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig)
+
+    # ---------------- RMSE ----------------
+    fig = px.bar(
+        result_df,
+        x="Model",
+        y="RMSE",
+        title="Root Mean Squared Error",
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+############################ busines insights ##################
+
+elif page == "Business Insights":
+
+    st.title("📊 Business Insights")
+
+    revenue_by_country = filtered_data.groupby('Country')['TotalPrice'].sum().sort_values(ascending=False).head(10)
+
+    fig = px.bar(
+        revenue_by_country,
+        title="Top Revenue Generating Countries",
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig)
+
+    st.write("Top performing country:", revenue_by_country.index[0])
+
+
+
 
 
 # ======================================================
