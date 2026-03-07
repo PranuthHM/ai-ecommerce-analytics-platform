@@ -136,27 +136,6 @@ elif page == "Customer Analytics":
             .reset_index()
         )
 
-        # ================= TOP CUSTOMERS =================
-
-        st.subheader("🏆 Top 10 Customers")
-
-        top_customers = (
-            customer_spending
-            .sort_values(by='TotalPrice', ascending=False)
-            .head(10)
-        )
-
-        fig = px.bar(
-            top_customers,
-            x='CustomerID',
-            y='TotalPrice',
-            title="Top Customers by Revenue",
-            template="plotly_dark",
-            text_auto=True
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-
         # ================= SPENDING DISTRIBUTION =================
 
         # ================= SPENDING DISTRIBUTION =================
@@ -186,9 +165,8 @@ elif page == "Customer Analytics":
         )
 
         st.plotly_chart(fig2, use_container_width=True)
-
-
-        # ================= ADDITIONAL CORPORATE METRICS =================
+        
+          # ================= ADDITIONAL CORPORATE METRICS =================
 
         col1, col2, col3 = st.columns(3)
 
@@ -206,6 +184,30 @@ elif page == "Customer Analytics":
             "Highest Customer Spend",
             f"${customer_spending['TotalPrice'].max():,.2f}"
         )
+
+        # ================= TOP CUSTOMERS =================
+
+        st.subheader("🏆 Top 10 Customers")
+
+        top_customers = (
+            customer_spending
+            .sort_values(by='TotalPrice', ascending=False)
+            .head(10)
+        )
+
+        fig = px.bar(
+            top_customers,
+            x='CustomerID',
+            y='TotalPrice',
+            title="Top Customers by Revenue",
+            template="plotly_dark",
+            text_auto=True
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+
+      
 
         st.success("✅ Customer analytics loaded successfully")
 
